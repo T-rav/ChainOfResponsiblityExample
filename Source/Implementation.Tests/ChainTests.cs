@@ -12,17 +12,12 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 190.99, Description = "Stationary" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
-
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
             actual.Approved.Should().BeTrue();
-            actual.By.Should().Be(brendon);
+            actual.By.Should().Be(teamLead);
             actual.Notes.Should().Be("Your purchase of Stationary has been approved");
         }
 
@@ -32,17 +27,12 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 200.00, Description = "Stationary" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
-
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
             actual.Approved.Should().BeTrue();
-            actual.By.Should().Be(brendon);
+            actual.By.Should().Be(teamLead);
             actual.Notes.Should().Be("Your purchase of Stationary has been approved");
         }
 
@@ -52,17 +42,13 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 998.99, Description = "Team Lunch" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
-
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
+            var expectedApprover = new Manager("Trav");
             actual.Approved.Should().BeTrue();
-            actual.By.Should().Be(trav);
+            actual.By.Should().BeEquivalentTo(expectedApprover);
             actual.Notes.Should().Be("Your purchase of Team Lunch has been approved");
         }
 
@@ -72,17 +58,14 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 1000.00, Description = "Team Lunch" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
 
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
+            var expectedApprover = new Manager("Trav");
             actual.Approved.Should().BeTrue();
-            actual.By.Should().Be(trav);
+            actual.By.Should().BeEquivalentTo(expectedApprover);
             actual.Notes.Should().Be("Your purchase of Team Lunch has been approved");
         }
 
@@ -92,17 +75,13 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 1000.10, Description = "Graphics Card" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
-
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
+            var expectedApprover = new Director("Pete");
             actual.Approved.Should().BeTrue();
-            actual.By.Should().Be(pete);
+            actual.By.Should().BeEquivalentTo(expectedApprover);
             actual.Notes.Should().Be("Your purchase of Graphics Card has been approved");
         }
 
@@ -112,17 +91,13 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 5000.00, Description = "New Monitors" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
-
-            brendon.SetSuccessor(trav);
-            trav.SetSuccessor(pete);
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
             // act
-            var actual = brendon.ProcessRequest(purchase);
+            var actual = teamLead.ProcessRequest(purchase);
             // assert
+            var expectedApprover = new Director("Pete");
             actual.Approved.Should().BeFalse();
-            actual.By.Should().Be(pete);
+            actual.By.Should().BeEquivalentTo(expectedApprover);
             actual.Notes.Should().Be("I need to speak with the CEO first!");
         }
 
@@ -132,18 +107,25 @@ namespace Implementation.Tests
             // arrange
             var purchase = new Purchase { Amount = 5100.00, Description = "New Monitors" };
 
-            var brendon = new TeamLead("Brendon");
-            var trav = new Manager("Trav");
-            var pete = new Director("Pete");
+            var teamLead = MakeApprovalChainForTeamLead("Brendon", "Trav", "Pete");
+            // act
+            var actual = teamLead.ProcessRequest(purchase);
+            // assert
+            var expectedApprover = new Director("Pete");
+            actual.Approved.Should().BeFalse();
+            actual.By.Should().BeEquivalentTo(expectedApprover);
+            actual.Notes.Should().Be("I need to speak with the CEO first!");
+        }
+
+        private static TeamLead MakeApprovalChainForTeamLead(string teamLeadName, string managerName, string directorName)
+        {
+            var brendon = new TeamLead(teamLeadName);
+            var trav = new Manager(managerName);
+            var pete = new Director(directorName);
 
             brendon.SetSuccessor(trav);
             trav.SetSuccessor(pete);
-            // act
-            var actual = brendon.ProcessRequest(purchase);
-            // assert
-            actual.Approved.Should().BeFalse();
-            actual.By.Should().Be(pete);
-            actual.Notes.Should().Be("I need to speak with the CEO first!");
+            return brendon;
         }
     }
 }
